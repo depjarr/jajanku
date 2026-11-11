@@ -69,7 +69,7 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
   if (error) {
     hit(keyUser, 15 * MIN);
     hit(keyIp, 15 * MIN);
-    if (error.message === "Email not confirmed") return { error: "Email belum dikonfirmasi. Cek kotak masuk emailmu." };
+    if (error.message === "Email not confirmed") return { error: "Akun ini belum aktif. Hubungi admin Jajanku ya." };
     const left = checkLimit(keyUser, 5).remaining;
     return { error: left <= 2 ? `Email atau password salah. Sisa ${left} percobaan sebelum dikunci 15 menit.` : "Email atau password salah." };
   }
@@ -78,7 +78,7 @@ export async function login(_: AuthState, formData: FormData): Promise<AuthState
 }
 
 export async function register(_: AuthState, formData: FormData): Promise<AuthState> {
-  if (looksLikeBot(formData)) return { info: "Akun dibuat! Cek emailmu untuk konfirmasi, lalu masuk." };
+  if (looksLikeBot(formData)) redirect("/login?daftar=ok");
   const parsed = registerSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
 
@@ -103,9 +103,9 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     return { error: "Gagal membuat akun. Coba lagi sebentar lagi." };
   }
 
-  // Jika konfirmasi email aktif, sesi belum ada.
-  if (!data.session) return { info: "Akun dibuat! Cek emailmu untuk konfirmasi, lalu masuk." };
-  redirect("/");
+  // Selesai daftar → keluar dulu (bila Supabase langsung memberi sesi), lalu arahkan ke halaman Masuk.
+  if (data.session) await supabase.auth.signOut();
+  redirect("/login?daftar=ok");
 }
 
 export async function logout() {
