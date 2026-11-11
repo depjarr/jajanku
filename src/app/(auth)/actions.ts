@@ -6,8 +6,9 @@ import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { checkLimit, hit, minutes, reset } from "@/lib/rate-limit";
 import { passwordProblem } from "@/lib/password";
+import { issueRecoveryCode, recoveryEnabled, setPassword, verifyRecoveryCode } from "@/lib/recovery";
 
-export type AuthState = { error?: string; info?: string } | undefined;
+export type AuthState = { error?: string; info?: string; recovery?: string } | undefined;
 
 const MIN = 60_000;
 
@@ -104,8 +105,10 @@ export async function register(_: AuthState, formData: FormData): Promise<AuthSt
     return { error: "Gagal membuat akun. Coba lagi sebentar lagi." };
   }
 
-  // Selesai daftar → keluar dulu (bila Supabase langsung memberi sesi), lalu arahkan ke halaman Masuk.
+  // Buat kode pemulihan (ditampilkan sekali), lalu keluar dulu bila Supabase langsung memberi sesi.
+  const code = data.user ? await issueRecoveryCode(data.user.id, parsed.data.email) : null;
   if (data.session) await supabase.auth.signOut();
+  if (code) return { recovery: code };
   redirect("/login?daftar=ok");
 }
 
@@ -115,22 +118,59 @@ export async function logout() {
   redirect("/login");
 }
 
-export async function requestReset(_: AuthState, formData: FormData): Promise<AuthState> {
-  const generic: AuthState = { info: "Kalau email itu terdaftar, link untuk membuat password baru sudah dikirim. Cek kotak masuk & spam ya." };
-  if (looksLikeBot(formData)) return generic;
-  const parsed = z.email("Email belum valid").safeParse(formData.get("email"));
+const resetSchema = z.object({
+  email: z.email("Email belum valid").transform((e) => e.toLowerCase()),
+  code: z.string().trim().min(8, "Kode pemulihan belum lengkap").max(40),
+  password: z.string().max(200),
+  confirm: z.string(),
+});
+
+/** Lupa password tanpa email: email + kode pemulihan → password baru, lalu dapat kode baru. */
+export async function resetWithCode(_: AuthState, formData: FormData): Promise<AuthState> {
+  const wrong: AuthState = { error: "Email atau kode pemulihan salah." };
+  if (looksLikeBot(formData)) return wrong;
+  if (!recoveryEnabled()) return { error: "Fitur kode pemulihan belum diaktifkan (SUPABASE_SECRET_KEY belum diisi)." };
+  const parsed = resetSchema.safeParse(Object.fromEntries(formData));
   if (!parsed.success) return { error: parsed.error.issues[0].message };
+  const { email, code, password, confirm } = parsed.data;
 
-  const key = `reset:${await clientIp()}`;
-  const limit = checkLimit(key, 3);
-  if (!limit.allowed) return { error: `Tunggu ${minutes(limit.retryAfterMs)} menit sebelum minta link lagi.` };
-  hit(key, 15 * MIN);
+  const keyUser = `recover:${email}`;
+  const keyIp = `recover-ip:${await clientIp()}`;
+  const byUser = checkLimit(keyUser, 5);
+  const byIp = checkLimit(keyIp, 15);
+  if (!byUser.allowed || !byIp.allowed) {
+    return { error: `Terlalu banyak percobaan. Coba lagi dalam ${minutes(Math.max(byUser.retryAfterMs, byIp.retryAfterMs))} menit.` };
+  }
 
+  const problem = passwordProblem(password, [email]);
+  if (problem) return { error: problem };
+  if (password !== confirm) return { error: "Ulangi password belum sama" };
+
+  const userId = await verifyRecoveryCode(email, code);
+  if (!userId) {
+    hit(keyUser, 15 * MIN);
+    hit(keyIp, 15 * MIN);
+    return wrong;
+  }
+  if (!(await setPassword(userId, password))) return { error: "Gagal menyimpan password baru. Coba lagi sebentar." };
+  reset(keyUser);
+  // Kode lama hangus, ganti dengan yang baru.
+  const next = await issueRecoveryCode(userId, email);
+  return next ? { recovery: next } : { info: "Password diganti! Silakan masuk." };
+}
+
+/** Buat ulang kode pemulihan untuk user yang sedang login. */
+export async function regenerateRecoveryCode(): Promise<AuthState> {
+  if (!recoveryEnabled()) return { error: "Fitur kode pemulihan belum diaktifkan." };
   const supabase = await createClient();
-  const origin = (await headers()).get("origin") ?? "";
-  await supabase.auth.resetPasswordForEmail(parsed.data.toLowerCase(), { redirectTo: `${origin}/auth/callback?next=/reset-password` });
-  // Selalu tampilkan pesan yang sama supaya tidak membocorkan email mana yang terdaftar.
-  return generic;
+  const { data } = await supabase.auth.getUser();
+  if (!data.user?.email) return { error: "Sesi habis, silakan masuk lagi." };
+  const key = `recover-new:${data.user.id}`;
+  const limit = checkLimit(key, 5);
+  if (!limit.allowed) return { error: `Tunggu ${minutes(limit.retryAfterMs)} menit dulu ya.` };
+  hit(key, 60 * MIN);
+  const code = await issueRecoveryCode(data.user.id, data.user.email);
+  return code ? { recovery: code } : { error: "Gagal membuat kode. Coba lagi sebentar." };
 }
 
 export async function updatePassword(_: AuthState, formData: FormData): Promise<AuthState> {

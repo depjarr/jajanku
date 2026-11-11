@@ -8,15 +8,18 @@ import { logout } from "@/app/(auth)/actions";
 import { CATEGORIES, CATEGORY_LABEL, itemTotal, rupiah, type Category } from "@/lib/types";
 import { MONTHS, monthRange, todayJakarta } from "@/lib/dates";
 import { ProfileForm } from "./profile-form";
+import { RecoveryPanel } from "./recovery-panel";
+import { recoveryCreatedAt, recoveryEnabled } from "@/lib/recovery";
 
 export default async function KamuPage() {
   const { supabase, user } = await requireUser();
   const [y, m] = todayJakarta().split("-").map(Number);
   const { start, end } = monthRange(y, m);
 
-  const [{ data: profile }, { data: items }] = await Promise.all([
+  const [{ data: profile }, { data: items }, recoverySince] = await Promise.all([
     supabase.from("profiles").select("display_name,diary_name").eq("id", user.id).single(),
     supabase.from("items").select("category,qty,price,entries!inner(eaten_on)").gte("entries.eaten_on", start).lte("entries.eaten_on", end),
+    recoveryCreatedAt(user.id),
   ]);
 
   const byCat = new Map<Category, number>();
@@ -80,6 +83,8 @@ export default async function KamuPage() {
       </nav>
 
       <ProfileForm displayName={profile?.display_name ?? ""} diaryName={profile?.diary_name ?? "Jajanku"} />
+
+      <RecoveryPanel enabled={recoveryEnabled()} createdAt={recoverySince} />
 
       <form action={logout}>
         <button className="flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-line py-3 font-semibold text-muted">

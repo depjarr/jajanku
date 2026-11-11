@@ -7,6 +7,7 @@ import { ChevronLeft, Eye, EyeOff } from "lucide-react";
 import { login, register, type AuthState } from "./actions";
 import { ScanIllustration } from "@/components/ui/scan-illustration";
 import { BotTrap, PasswordMeter } from "./guards";
+import { RecoveryCodeCard } from "@/components/recovery-card";
 import { softSpring, spring } from "@/components/ui/haptic";
 
 /**
@@ -92,6 +93,11 @@ function Form({ mode }: { mode: "login" | "register" }) {
   const [pw, setPw] = useState("");
   const [confirm, setConfirm] = useState("");
   const mismatch = !isLogin && confirm.length > 0 && confirm !== pw;
+
+  // Daftar berhasil → tampilkan kode pemulihan sekali, lalu lanjut ke Masuk.
+  if (state?.recovery) {
+    return <RecoveryCodeCard code={state.recovery} intro="Akunmu sudah jadi! Kode ini dipakai kalau kamu lupa password. Hanya ditampilkan sekali, simpan baik-baik ya." next={{ href: "/login?daftar=ok", label: "Lanjut ke Masuk" }} />;
+  }
 
   return (
     <form action={action} className="relative space-y-3">

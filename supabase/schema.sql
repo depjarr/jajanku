@@ -177,3 +177,16 @@ create policy "hapus file sendiri" on storage.objects
     bucket_id in ('stickers', 'photos')
     and (storage.foldername(name))[1] = (select auth.uid())::text
   );
+
+-- ---------------------------------------------------------------------------
+-- Kode pemulihan (lupa password tanpa email)
+-- Hanya hash yang disimpan. Tidak ada policy → hanya server (secret key) yang bisa baca/tulis.
+-- ---------------------------------------------------------------------------
+create table if not exists public.recovery_codes (
+  user_id uuid primary key references auth.users (id) on delete cascade,
+  email text not null,
+  code_hash text not null,
+  created_at timestamptz not null default now()
+);
+create index if not exists recovery_codes_email_idx on public.recovery_codes (email);
+alter table public.recovery_codes enable row level security;

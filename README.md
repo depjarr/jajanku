@@ -166,3 +166,13 @@ npx supabase start
 Salin `supabase/schema.sql` ke `supabase/migrations/20261111000000_init.sql`, lalu `npx supabase db reset`
 (menjalankan migrasi + `seed.sql`). Akun demo tertulis di bagian atas `supabase/seed.sql`.
 URL & key lokal muncul di output `supabase start`.
+
+## Kode pemulihan password (tanpa email)
+
+Lupa password memakai **email + kode pemulihan** (bukan link email). Kode `JAJAN-XXXX-XXXX` ditampilkan sekali setelah daftar, bisa dibuat ulang di halaman **Kamu**. Yang disimpan hanya hash-nya.
+
+1. Jalankan ulang `supabase/schema.sql` (membuat tabel `recovery_codes`).
+2. Ambil **Secret key** di Supabase → Project Settings → API Keys → Secret keys (`sb_secret_...`).
+3. Isi `SUPABASE_SECRET_KEY` di `.env.local` dan di Vercel → Settings → Environment Variables. Jangan pakai awalan `NEXT_PUBLIC_` dan jangan di-commit.
+
+Tanpa key ini aplikasi tetap jalan, hanya saja kode pemulihan tidak dibuat.
