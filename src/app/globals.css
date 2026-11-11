@@ -1,0 +1,239 @@
+@import "tailwindcss";
+
+:root {
+  --c-bg: #ffffff;
+  --c-surface: #ffffff;
+  --c-soft: #f1f8e4;
+  --c-primary: #9cc655;
+  --c-strong: #4a7419;
+  --c-deep: color-mix(in oklab, var(--c-strong) 78%, black);
+  --c-primary-ink: #1f2a12;
+  --c-accent: #f28b95;
+  --c-accent-ink: #262626;
+  --c-accent-text: #c2414f;
+  --c-ink: #262626;
+  --c-muted: #6b6b6b;
+  --c-line: #ededed;
+  --f-heading: var(--font-josefin);
+  --f-body: var(--font-nunito);
+}
+
+@theme inline {
+  --color-bg: var(--c-bg);
+  --color-surface: var(--c-surface);
+  --color-soft: var(--c-soft);
+  --color-primary: var(--c-primary);
+  --color-primary-ink: var(--c-primary-ink);
+  --color-strong: var(--c-strong);
+  --color-deep: var(--c-deep);
+  --color-accent: var(--c-accent);
+  --color-accent-ink: var(--c-accent-ink);
+  --color-accent-text: var(--c-accent-text);
+  --color-ink: var(--c-ink);
+  --color-muted: var(--c-muted);
+  --color-line: var(--c-line);
+  --font-heading: var(--f-heading), ui-rounded, system-ui, sans-serif;
+  --font-body: var(--f-body), ui-rounded, system-ui, sans-serif;
+}
+
+html,
+body {
+  background: var(--c-bg);
+  color: var(--c-ink);
+  font-family: var(--f-body), ui-rounded, system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+h1,
+h2,
+h3,
+.font-heading {
+  font-family: var(--f-heading), ui-rounded, system-ui, sans-serif;
+}
+
+/* ---- Pola dekorasi ala scrapbook ---- */
+.pattern-polkadot {
+  background-color: var(--c-accent);
+  background-image: radial-gradient(color-mix(in srgb, white 55%, transparent) 2px, transparent 2.5px);
+  background-size: 12px 12px;
+}
+.pattern-gingham {
+  background-color: var(--c-surface);
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--c-accent) 35%, transparent) 50%, transparent 50%),
+    linear-gradient(color-mix(in srgb, var(--c-accent) 35%, transparent) 50%, transparent 50%);
+  background-size: 14px 14px;
+}
+.pattern-polos {
+  background-color: var(--c-accent);
+}
+.pattern-leaf {
+  background-color: var(--c-primary);
+  background-image: radial-gradient(color-mix(in srgb, white 30%, transparent) 1.5px, transparent 2px);
+  background-size: 10px 10px;
+}
+
+/* Pola header mengikuti pilihan di Tampilan */
+html[data-pattern="gingham"] .pattern-polkadot {
+  background-color: var(--c-surface);
+  background-image:
+    linear-gradient(90deg, color-mix(in srgb, var(--c-accent) 40%, transparent) 50%, transparent 50%),
+    linear-gradient(color-mix(in srgb, var(--c-accent) 40%, transparent) 50%, transparent 50%);
+  background-size: 10px 10px;
+}
+html[data-pattern="polos"] .pattern-polkadot {
+  background-image: none;
+}
+
+/* Struk dengan pinggiran bergerigi */
+.ticket {
+  --r: 7px;
+  background: var(--c-surface);
+  -webkit-mask:
+    radial-gradient(var(--r) at 50% 0, #0000 98%, #000) 50% 0 / calc(2 * var(--r) + 6px) 51% repeat-x,
+    radial-gradient(var(--r) at 50% 100%, #0000 98%, #000) 50% 100% / calc(2 * var(--r) + 6px) 51% repeat-x;
+  mask:
+    radial-gradient(var(--r) at 50% 0, #0000 98%, #000) 50% 0 / calc(2 * var(--r) + 6px) 51% repeat-x,
+    radial-gradient(var(--r) at 50% 100%, #0000 98%, #000) 50% 100% / calc(2 * var(--r) + 6px) 51% repeat-x;
+  padding-block: 18px;
+}
+
+/* Efek "debu" saat foto dianalisis */
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+.analyzing::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.55) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+}
+
+/* Garis jahitan putus-putus */
+.stitch {
+  border: 2px dashed color-mix(in srgb, var(--c-primary-ink) 75%, transparent);
+}
+
+/* Efek stiker: outline putih + bayangan lembut mengikuti bentuk PNG */
+.sticker {
+  filter: drop-shadow(2px 0 0 white) drop-shadow(-2px 0 0 white) drop-shadow(0 2px 0 white)
+    drop-shadow(0 -2px 0 white) drop-shadow(0 3px 4px rgb(0 0 0 / 0.18));
+}
+
+/* Animasi stiker muncul */
+@keyframes pop-in {
+  0% {
+    transform: scale(0.3) rotate(-12deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.08) rotate(3deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+  }
+}
+.animate-pop {
+  animation: pop-in 0.45s cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop {
+    animation: none;
+  }
+}
+
+/* Kartu ala iOS: putih bersih, sudut besar, bayangan lembut */
+@layer components {
+  .window {
+    background: var(--c-surface);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--c-ink) 6%, transparent),
+      0 10px 30px -12px color-mix(in srgb, var(--c-ink) 22%, transparent);
+  }
+}
+
+/* Material kaca (tab bar, nav bar, sheet) */
+.glass {
+  background: color-mix(in srgb, var(--c-surface) 86%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Umpan balik tekan ala iOS: mengecil cepat saat ditekan, memantul saat dilepas */
+.press {
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 0.2s ease;
+}
+.press:active {
+  transform: scale(0.95);
+  opacity: 0.85;
+  transition-duration: 0.12s;
+  transition-timing-function: ease-out;
+}
+
+a,
+button,
+[role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* Kerangka loading berkilau */
+@keyframes skeleton-shine {
+  0% {
+    background-position: 150% 0;
+  }
+  100% {
+    background-position: -50% 0;
+  }
+}
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    color-mix(in srgb, var(--c-soft) 100%, transparent) 30%,
+    color-mix(in srgb, var(--c-surface) 80%, var(--c-soft)) 50%,
+    color-mix(in srgb, var(--c-soft) 100%, transparent) 70%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shine 1.3s ease-in-out infinite;
+}
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.animate-in {
+  animation: fade-in-up 0.25s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .animate-in {
+    animation: none;
+  }
+}
+
+/* Latar lembut bergradasi */
+@layer components {
+  .app-bg {
+    background: var(--c-bg);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
