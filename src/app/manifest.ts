@@ -7,6 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     short_name: "Jajanku",
     description: "Foto jajananmu, AI yang mencatat. Tiap item jadi stiker di kalendermu.",
     lang: "id",
+    id: "/",
     start_url: "/",
     scope: "/",
     display: "standalone",

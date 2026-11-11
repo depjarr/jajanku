@@ -2,7 +2,6 @@
 // Sengaja TIDAK menyimpan cache halaman supaya data jajan selalu terbaru dan privat.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
-self.addEventListener("fetch", () => {});
 
 // Ketuk notifikasi → buka (atau fokuskan) aplikasi di halaman tujuan.
 self.addEventListener("notificationclick", (event) => {
