@@ -1,10 +1,9 @@
 "use client";
 
-import { EmojiBubble } from "@/components/icons";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useActionState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, KeyRound, Lock } from "lucide-react";
 import { resetWithCode, updatePassword, type AuthState } from "./actions";
 import { RecoveryCodeCard } from "@/components/recovery-card";
 import { softSpring } from "@/components/ui/haptic";
@@ -13,14 +12,14 @@ import { BotTrap, PasswordMeter } from "./guards";
 
 const CONFIG = {
   lupa: {
-    emoji: "🔑",
+    icon: KeyRound,
     title: "Lupa password?",
     sub: "Masukkan email dan kode pemulihan yang kamu simpan waktu daftar, lalu buat password baru.",
     button: "Ganti password",
     action: resetWithCode,
   },
   reset: {
-    emoji: "🔒",
+    icon: Lock,
     title: "Buat password baru",
     sub: "Minimal 8 karakter, ya.",
     button: "Simpan password",
@@ -44,7 +43,7 @@ export function SimpleAuthForm({ kind }: { kind: keyof typeof CONFIG }) {
       </div>
 
       <motion.div initial={{ scale: 0.4, rotate: -20 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 260, damping: 12 }} className="mx-auto">
-        <EmojiBubble emoji={c.emoji} className="size-20 text-4xl" tone="primary" />
+        <span className="grid size-20 place-items-center rounded-full bg-soft text-strong"><c.icon className="size-9" strokeWidth={1.8} aria-hidden /></span>
       </motion.div>
       <h1 className="mt-4 text-center font-heading text-[30px] font-bold tracking-tight">{c.title}</h1>
       <p className="mt-1 text-center text-[15px] text-muted">{c.sub}</p>
@@ -53,7 +52,7 @@ export function SimpleAuthForm({ kind }: { kind: keyof typeof CONFIG }) {
         <div className="window mt-6 p-5">
           <RecoveryCodeCard
             code={state.recovery}
-            title="Password diganti! 🎉"
+            title="Password diganti"
             intro="Kode lamamu sudah hangus. Ini kode pemulihan barumu, simpan baik-baik ya."
             next={{ href: "/login", label: "Masuk dengan password baru" }}
           />

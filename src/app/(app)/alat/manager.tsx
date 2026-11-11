@@ -1,6 +1,6 @@
 "use client";
 
-import { EmojiBubble } from "@/components/icons";
+import { Store as StoreIcon } from "lucide-react";
 import { useState, useTransition } from "react";
 import { Check, Lock, Pencil, Plus, Trash2, X } from "lucide-react";
 import { deleteStore, deleteUnit, saveStore, saveUnit } from "../actions";
@@ -127,7 +127,7 @@ function Stores({ stores }: { stores: Store[] }) {
               </li>
             ) : (
               <li key={s.id} className="flex items-center gap-3 px-4 py-3">
-                <EmojiBubble emoji="🏪" className="size-8 text-base" />
+                <span className="grid size-8 shrink-0 place-items-center rounded-full bg-soft text-strong"><StoreIcon className="size-4" aria-hidden /></span>
                 <span className="flex-1">{s.name}</span>
                 <RowActions onEdit={() => setEditing(s.id)} onDelete={() => deleteStore(s.id)} name={s.name} />
               </li>

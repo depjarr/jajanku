@@ -1,5 +1,6 @@
 "use client";
 
+import { Gift } from "lucide-react";
 import { CategoryLabel } from "@/components/icons";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -44,7 +45,7 @@ export function StatsView({ data }: { data: StatsData }) {
         right={
           <span className="flex gap-2">
             <Link href={`/rekap?m=${data.monthKey}`} className="press flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-sm font-semibold text-primary-ink">
-              🎁 Rekap
+              <Gift className="size-4" aria-hidden /> Rekap
             </Link>
             <a href={`/api/export?m=${data.monthKey}`} className="press flex items-center gap-1.5 rounded-full bg-strong px-3.5 py-2 text-sm font-semibold text-white" download>
               <Download className="size-4" aria-hidden /> Excel

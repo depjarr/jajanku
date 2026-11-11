@@ -1,11 +1,10 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect } from "react";
 import { motion } from "motion/react";
 import { confetti } from "@/lib/confetti";
 import { toast } from "@/lib/live";
-import type { Achievements, Badge } from "@/lib/achievements";
+import type { Badge } from "@/lib/achievements";
 
 const KEY = "jajanku_badges";
 
@@ -42,39 +41,6 @@ export function AchievementWatcher({ badges }: { badges: Badge[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ids]);
   return null;
-}
-
-/** Baris kecil streak di Meja. */
-export function StreakRow({ ach }: { ach: Achievements }) {
-  const chips = [
-    ach.recordStreak > 0 && { emoji: "🔥", text: `${ach.recordStreak} hari nyatat` },
-    ach.hematStreak != null && ach.hematStreak > 0 && { emoji: "🌱", text: `${ach.hematStreak} hari hemat` },
-    { emoji: "🏅", text: `${ach.unlocked}/${ach.badges.length} pencapaian` },
-  ].filter(Boolean) as { emoji: string; text: string }[];
-
-  return (
-    <Link href="/pencapaian" className="no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 py-1 lg:mx-0 lg:px-0" aria-label="Lihat streak dan pencapaian">
-      {chips.map((c, i) => (
-        <motion.span
-          key={c.text}
-          initial={{ opacity: 0, scale: 0.8, y: 6 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 380, damping: 20, delay: 0.25 + i * 0.07 }}
-          className="press flex min-h-10 shrink-0 items-center gap-1.5 rounded-full bg-soft px-3.5 text-sm font-semibold text-strong"
-        >
-          <motion.span
-            className="text-base leading-none"
-            animate={c.emoji === "🔥" ? { scale: [1, 1.18, 1], rotate: [0, -6, 0] } : undefined}
-            transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 1.2 }}
-            aria-hidden
-          >
-            {c.emoji}
-          </motion.span>
-          {c.text}
-        </motion.span>
-      ))}
-    </Link>
-  );
 }
 
 /** Kartu pencapaian (halaman /pencapaian). */

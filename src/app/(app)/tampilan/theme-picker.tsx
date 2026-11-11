@@ -1,5 +1,6 @@
 "use client";
 
+import { CupSoda } from "lucide-react";
 import { useEffect, useState, useTransition } from "react";
 import { Check } from "lucide-react";
 import { saveTheme } from "../actions";
@@ -63,7 +64,7 @@ export function ThemePicker({ initial, diaryName }: { initial: ThemeSettings; di
                 <div className="m-3 rounded-2xl p-3" style={{ background: p.colors.surface, color: p.colors.ink }}>
                   <p className="font-heading text-lg font-semibold">November</p>
                   <div className="mt-1 flex items-center gap-2">
-                    <span className="grid size-8 place-items-center rounded-full" style={{ background: p.colors.soft, color: p.colors.strong }}><span className="text-base leading-none" aria-hidden>🧋</span></span>
+                    <span className="grid size-8 place-items-center rounded-full" style={{ background: p.colors.soft, color: p.colors.strong }}><CupSoda className="size-4" aria-hidden /></span>
                     <span className="text-sm" style={{ fontFamily: "var(--f-body)" }}>Es teh manis</span>
                   </div>
                   <div className="mt-2 flex gap-1">

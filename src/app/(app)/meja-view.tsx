@@ -3,7 +3,7 @@
 import { CategoryLabel } from "@/components/icons";
 import { MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
-import { AchievementWatcher, StreakRow } from "@/components/achievements";
+import { AchievementWatcher } from "@/components/achievements";
 import type { Achievements } from "@/lib/achievements";
 import { forgetPending, launchFlight, markLanded, retrySave, stableKey, useHidden, usePending, type PendingEntry, type PendingItem } from "@/lib/live";
 import Link from "next/link";
@@ -137,9 +137,8 @@ export function MejaView({
         subtitle={`${greet}${displayName ? `, ${displayName}` : ""}`}
         right={
           <span className="flex items-center gap-2">
-          <Link href="/chat" aria-label="Tanya Jaja, asisten AI" className="press relative grid size-10 place-items-center rounded-full bg-primary text-primary-ink shadow-sm">
+          <Link href="/chat" aria-label="Tanya Jaja, asisten AI" className="press grid size-10 place-items-center rounded-full bg-surface text-muted shadow-sm">
             <MessageCircle className="size-5" aria-hidden />
-            <span className="absolute -right-0.5 -top-0.5 size-3 rounded-full bg-accent ring-2 ring-bg" aria-hidden />
           </Link>
           <Link href="/kamu" aria-label="Profil" className="press grid size-10 place-items-center rounded-full bg-surface font-heading text-lg font-bold shadow-sm">
             {(displayName || diaryName).charAt(0).toUpperCase()}
@@ -160,25 +159,20 @@ export function MejaView({
       <div className="lg:sticky lg:top-8 lg:order-2 lg:space-y-5">
       {/* Kartu ringkasan */}
       <motion.section
-        initial={{ opacity: 0, y: 20, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
+        initial={{ opacity: 0, y: -24 }}
+        animate={{ opacity: 1, y: 0 }}
         transition={softSpring}
-        className="relative mb-3 overflow-hidden rounded-[28px] bg-gradient-to-br from-deep to-strong p-5 text-white shadow-[0_20px_40px_-18px_var(--c-strong)]"
+        className="mb-4 drop-shadow-[0_16px_18px_rgb(0_0_0/0.16)]"
+        aria-label="Ringkasan bulan ini"
       >
-        <motion.div
-          aria-hidden
-          className="absolute -right-10 -top-12 size-44 rounded-full bg-primary/40 blur-2xl"
-          animate={{ scale: [1, 1.15, 1], x: [0, -10, 0] }}
-          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <motion.div
-          aria-hidden
-          className="absolute -bottom-16 left-6 size-40 rounded-full bg-accent/40 blur-2xl"
-          animate={{ scale: [1.1, 1, 1.1], x: [0, 14, 0] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-        />
-        <div className="relative">
-          <p className="text-sm opacity-70">Jajan {MONTHS[month - 1]} {year}</p>
+        {/* Kartu ringkasan bergaya struk kasir: garis tipis, tulisan mono, tepi bawah bergerigi */}
+        <div className="receipt receipt-lines relative rounded-t-[22px] bg-strong px-5 pb-9 pt-4 text-white">
+          <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.2em] opacity-80">
+            <span>Struk jajan</span>
+            <span>{MONTHS[month - 1].slice(0, 3)} {year}</span>
+          </div>
+          <div className="my-3 border-t border-dashed border-white/35" />
+          <p className="font-mono text-[11px] uppercase tracking-[0.2em] opacity-70">Total</p>
           <p className="mt-1 font-heading text-[40px] font-bold leading-none tracking-tight">
             <AnimatedNumber value={total} format={rupiah} />
           </p>
@@ -205,13 +199,15 @@ export function MejaView({
             ))}
             {catTotal === 0 && <span>Belum ada jajan bulan ini</span>}
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <MiniStat label="item" value={allItems.length} />
-            <MiniStat label="hari jajan" value={byDay.size} />
-          </div>
+          <div className="my-4 border-t border-dashed border-white/35" />
+          <dl className="space-y-1 font-mono text-[13px]">
+            <ReceiptRow label="Item" value={allItems.length} />
+            <ReceiptRow label="Hari jajan" value={byDay.size} />
+            {achievements.recordStreak > 0 && <ReceiptRow label="Streak nyatat" value={achievements.recordStreak} suffix=" hr" />}
+          </dl>
+          <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.3em] opacity-60">** terima kasih sudah nyatat **</p>
         </div>
       </motion.section>
-      <StreakRow ach={achievements} />
       <AchievementWatcher badges={achievements.badges} />
       {isDesktop && (
         <motion.section initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={softSpring} className="window p-4" aria-label="Detail hari">
@@ -461,10 +457,10 @@ function EntryCard({ entry, storeNames }: { entry: LiveEntry; storeNames: Record
         <p className="line-clamp-2 font-heading text-[20px] font-bold leading-tight">{entry.title}</p>
         <p className="mt-1 line-clamp-1 text-sm text-muted">{entry.items.map((i) => i.name).join(", ")}</p>
         <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] text-muted">
-          {entry.eaten_at && <Chip emoji="🕐">{formatTime(entry.eaten_at)}</Chip>}
-          {store && <Chip emoji="🏪">{store}</Chip>}
-          {totalKcal > 0 && <Chip emoji="🔥">≈{kcal(totalKcal)}</Chip>}
-          {entry.location && <Chip emoji="📍">{entry.location}</Chip>}
+          {entry.eaten_at && <Chip>{formatTime(entry.eaten_at)}</Chip>}
+          {store && <Chip>{store}</Chip>}
+          {totalKcal > 0 && <Chip>≈{kcal(totalKcal)}</Chip>}
+          {entry.location && <Chip>{entry.location}</Chip>}
         </div>
         <span className="mt-3 inline-flex items-center gap-2 rounded-full bg-surface py-1 pl-3.5 pr-1 shadow-sm">
           <span className="font-heading text-[15px] font-bold">{rupiah(total)}</span>
@@ -552,11 +548,15 @@ function BudgetBar({ total, budget }: { total: number; budget: number }) {
   );
 }
 
-function MiniStat({ label, value }: { label: string; value: number }) {
+/** Baris struk: label .......... angka */
+function ReceiptRow({ label, value, suffix = "" }: { label: string; value: number; suffix?: string }) {
   return (
-    <div className="rounded-2xl bg-bg/10 px-3 py-2 backdrop-blur">
-      <p className="font-heading text-xl font-bold"><AnimatedNumber value={value} format={String} /></p>
-      <p className="text-xs opacity-70">{label}</p>
+    <div className="flex items-baseline gap-2">
+      <dt className="uppercase tracking-wider opacity-80">{label}</dt>
+      <span aria-hidden className="mb-1 flex-1 border-b border-dotted border-white/35" />
+      <dd className="font-bold">
+        <AnimatedNumber value={value} format={(n) => `${n}${suffix}`} />
+      </dd>
     </div>
   );
 }
@@ -569,10 +569,9 @@ function IconBtn({ label, onClick, children }: { label: string; onClick: () => v
   );
 }
 
-function Chip({ emoji, children }: { emoji: string; children: React.ReactNode }) {
+function Chip({ children }: { children: React.ReactNode }) {
   return (
-    <span className="flex items-center gap-1 rounded-full bg-surface/80 px-2 py-0.5">
-      <span aria-hidden>{emoji}</span>
+    <span className="rounded-full bg-surface/80 px-2 py-0.5">
       {children}
     </span>
   );
@@ -595,7 +594,7 @@ function MonthEmpty({ first, boxed = false }: { first: boolean; boxed?: boolean 
       emoji="🧺"
       orbit={["🍪", "🥤", "🍜"]}
       title="Bulan ini masih kosong"
-      text="Belum ada jajan tercatat di bulan ini. Hemat, atau lupa nyatat? 👀"
+      text="Belum ada jajan tercatat di bulan ini. Hemat, atau lupa nyatat?"
       cta={{ href: "/tambah", label: "Foto jajanan" }}
     />
   );

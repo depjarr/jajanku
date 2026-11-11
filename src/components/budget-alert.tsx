@@ -1,5 +1,6 @@
 "use client";
 
+import { Bell, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState, useSyncExternalStore } from "react";
@@ -65,7 +66,7 @@ export function BudgetAlert({ total, budget, monthKey }: { total: number; budget
             className={`mb-4 flex items-start gap-3 rounded-2xl px-4 py-3 text-sm ${level === "over" ? "bg-accent/30" : "bg-[#FFF2C6]"}`}
           >
             <motion.span className="mt-0.5 text-ink" animate={{ rotate: [0, -12, 12, -8, 0] }} transition={{ duration: 0.8, repeat: Infinity, repeatDelay: 2.5 }} aria-hidden>
-              <span className="text-xl leading-none" aria-hidden>⚠️</span>
+              <TriangleAlert className="size-5" aria-hidden />
             </motion.span>
             <p className="flex-1">
               {level === "over" ? (
@@ -117,7 +118,7 @@ export function NotifyToggle() {
       onClick={async () => setAsked(await Notification.requestPermission())}
       className="press mt-3 w-full rounded-xl bg-soft py-2.5 text-sm font-semibold"
     >
-      <span className="inline-flex items-center gap-1.5">🔔 Ingatkan aku saat budget hampir habis</span>
+      <span className="inline-flex items-center gap-1.5"><Bell className="size-4" aria-hidden /> Ingatkan aku saat budget hampir habis</span>
     </button>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { Flame } from "lucide-react";
 import { CategoryLabel } from "@/components/icons";
 import { useId, useState, useTransition } from "react";
 import { Plus } from "lucide-react";
@@ -147,7 +148,7 @@ export function ItemFields({
       </div>
 
       <label className="flex items-center gap-3 rounded-xl bg-soft px-3 py-2">
-        <span className="shrink-0 text-lg leading-none" aria-hidden>🔥</span>
+        <Flame className="size-4 shrink-0 text-accent-text" aria-hidden />
         <span className="flex-1">
           <span className="block text-xs text-muted">Kalori per {unit?.symbol ?? "unit"} · perkiraan AI</span>
           <span className="flex items-center gap-1 font-semibold">

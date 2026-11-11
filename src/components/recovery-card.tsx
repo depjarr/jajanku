@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useRef, useState } from "react";
 import { motion } from "motion/react";
-import { Check, Copy, Download } from "lucide-react";
+import { Check, Copy, Download, KeyRound } from "lucide-react";
 
 /**
  * Menampilkan kode pemulihan sekali: salin / simpan sebagai gambar,
@@ -47,7 +47,7 @@ export function RecoveryCodeCard({
   return (
     <motion.div initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: "spring", stiffness: 300, damping: 24 }} className="space-y-4">
       <div ref={card} className="rounded-[24px] bg-gradient-to-br from-soft to-surface p-5 text-center ring-1 ring-strong/15">
-        <p className="text-4xl leading-none" aria-hidden>🔑</p>
+        <span className="mx-auto grid size-14 place-items-center rounded-2xl bg-surface text-strong shadow-sm"><KeyRound className="size-7" aria-hidden /></span>
         <p className="mt-3 font-heading text-xl font-bold">{title}</p>
         <p className="mx-auto mt-1 max-w-xs text-sm text-muted">{intro}</p>
         <p className="mt-4 select-all rounded-2xl bg-surface px-3 py-3 font-mono text-[22px] font-bold tracking-[0.12em] text-strong shadow-sm" aria-label={`Kode pemulihan ${code.split("").join(" ")}`}>

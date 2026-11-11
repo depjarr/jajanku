@@ -1,5 +1,6 @@
 "use client";
 
+import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { Fragment, useEffect, useRef, useState } from "react";
@@ -113,7 +114,7 @@ export function ChatView({ displayName }: { displayName: string }) {
           <ChevronLeft className="size-6" />
         </Link>
         <span className="relative grid size-10 place-items-center rounded-full bg-primary text-primary-ink" aria-hidden>
-          <span className="text-lg leading-none" aria-hidden>🤖</span>
+          <Sparkles className="size-5" aria-hidden />
           <span className="absolute bottom-0 right-0 size-3 rounded-full bg-[#34C759] ring-2 ring-surface" />
         </span>
         <div className="min-w-0 flex-1">

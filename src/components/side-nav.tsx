@@ -3,21 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion } from "motion/react";
-import { BarChart3, Camera, Gift, House, Trophy, Images, LineChart, MessageCircle, Palette, Ruler, Search, UserRound } from "lucide-react";
+import { BarChart3, Camera, Gift, House, Trophy, Images, LineChart, MessageCircle, Search, UserRound, type LucideIcon } from "lucide-react";
 import { spring } from "@/components/ui/haptic";
 
-const LINKS = [
+/** Yang dipakai setiap hari. */
+const MAIN = [
   { href: "/", label: "Meja", icon: House },
   { href: "/statistik", label: "Statistik", icon: BarChart3 },
   { href: "/cari", label: "Cari", icon: Search },
-  { href: "/chat", label: "Tanya Jaja", icon: MessageCircle },
-  { href: "/album", label: "Album", icon: Images },
-  { href: "/pencapaian", label: "Pencapaian", icon: Trophy },
-  { href: "/rekap", label: "Rekap", icon: Gift },
-  { href: "/harga", label: "Harga", icon: LineChart },
-  { href: "/alat", label: "Unit & Toko", icon: Ruler },
-  { href: "/tampilan", label: "Tampilan", icon: Palette },
   { href: "/kamu", label: "Kamu", icon: UserRound },
+];
+/** Sesekali saja: hanya di sidebar desktop, sisanya lewat halaman Kamu. */
+const MORE = [
+  { href: "/album", label: "Album", icon: Images },
+  { href: "/harga", label: "Riwayat harga", icon: LineChart },
+  { href: "/rekap", label: "Rekap", icon: Gift },
+  { href: "/pencapaian", label: "Pencapaian", icon: Trophy },
+  { href: "/chat", label: "Tanya Jaja", icon: MessageCircle },
 ];
 
 /**
@@ -50,26 +52,42 @@ export function SideNav() {
       </Link>
 
       <ul className="space-y-1">
-        {LINKS.map(({ href, label, icon: Icon }) => {
-          const active = href === "/" ? path === "/" || path.startsWith("/momen") : path.startsWith(href);
-          return (
-            <li key={href}>
-              <Link
-                href={href}
-                aria-current={active ? "page" : undefined}
-                title={label}
-                className="relative flex flex-col items-center gap-1 rounded-2xl px-2 py-2.5 text-[11px] font-semibold lg:flex-row lg:gap-3 lg:px-3 lg:text-[15px]"
-              >
-                {active && <motion.span layoutId="side-pill" transition={spring} className="absolute inset-0 rounded-2xl bg-soft" />}
-                <Icon className={`relative size-[22px] ${active ? "text-ink" : "text-muted"}`} strokeWidth={active ? 2.4 : 1.8} aria-hidden />
-                <span className={`relative ${active ? "text-ink" : "text-muted"}`}>{label}</span>
-              </Link>
-            </li>
-          );
-        })}
+        {MAIN.map((l) => (
+          <NavItem key={l.href} {...l} path={path} />
+        ))}
+      </ul>
+
+      <p className="mb-1 mt-8 hidden px-3 text-xs font-semibold uppercase tracking-wider text-muted lg:block">Lainnya</p>
+      <ul className="hidden space-y-0.5 lg:block">
+        {MORE.map((l) => (
+          <NavItem key={l.href} {...l} path={path} small />
+        ))}
       </ul>
 
       <p className="mt-auto hidden px-2 text-xs text-muted lg:block">Jajan kecil, kenangan besar.</p>
     </aside>
+  );
+}
+
+function NavItem({ href, label, icon: Icon, path, small = false }: { href: string; label: string; icon: LucideIcon; path: string; small?: boolean }) {
+  const active =
+    href === "/"
+      ? path === "/" || path.startsWith("/momen")
+      : href === "/kamu"
+        ? ["/kamu", "/alat", "/tampilan"].some((p) => path.startsWith(p))
+        : path.startsWith(href);
+  return (
+    <li>
+      <Link
+        href={href}
+        aria-current={active ? "page" : undefined}
+        title={label}
+        className={`relative flex flex-col items-center gap-1 rounded-2xl px-2 font-semibold lg:flex-row lg:gap-3 lg:px-3 ${small ? "py-2 text-[11px] lg:text-sm" : "py-2.5 text-[11px] lg:text-[15px]"}`}
+      >
+        {active && <motion.span layoutId="side-pill" transition={spring} className="absolute inset-0 rounded-2xl bg-soft" />}
+        <Icon className={`relative ${small ? "size-[18px]" : "size-[22px]"} ${active ? "text-ink" : "text-muted"}`} strokeWidth={active ? 2.4 : 1.8} aria-hidden />
+        <span className={`relative ${active ? "text-ink" : "text-muted"}`}>{label}</span>
+      </Link>
+    </li>
   );
 }

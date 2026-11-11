@@ -1,5 +1,6 @@
 "use client";
 
+import { Star } from "lucide-react";
 import { CategoryLabel } from "@/components/icons";
 import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
@@ -68,7 +69,7 @@ export function AlbumView({ items }: { items: AlbumItem[] }) {
           onClick={() => setOnlyFav((v) => !v)}
           className={`press shrink-0 rounded-full px-4 py-2 text-sm font-semibold ring-1 ${onlyFav ? "bg-[#F5B300] text-ink ring-transparent" : "bg-surface ring-ink/5"}`}
         >
-          <span className="inline-flex items-center gap-1.5">⭐ Favorit</span>
+          <span className="inline-flex items-center gap-1.5"><Star className="size-4" aria-hidden /> Favorit</span>
         </button>
       </div>
 

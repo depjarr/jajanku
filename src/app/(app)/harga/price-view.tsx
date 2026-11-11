@@ -1,5 +1,6 @@
 "use client";
 
+import { Lightbulb } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
 import Link from "next/link";
 import { motion } from "motion/react";
@@ -76,7 +77,7 @@ export function PriceView({ query, points }: { query: string; points: PricePoint
             </li>
           ))}
         </ol>
-        {stores.length > 1 && <p className="mt-2 flex items-center gap-1.5 text-sm">💡 Paling hemat di <strong>{stores[0].name}</strong>.</p>}
+        {stores.length > 1 && <p className="mt-2 flex items-center gap-1.5 text-sm"><Lightbulb className="size-4 text-strong" aria-hidden /> Paling hemat di <strong>{stores[0].name}</strong>.</p>}
       </section>
 
       <section className="window p-4">

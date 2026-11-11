@@ -43,7 +43,7 @@ export function setRefresher(fn: () => void) {
 
 export type Toast = {
   id: number;
-  emoji: string;
+  emoji?: string;
   text: string;
   action?: { label: string; run: () => void };
   duration: number;
@@ -97,13 +97,12 @@ function deleteWithUndo(id: string, text: string, run: () => Promise<{ error?: s
     const r = await run().catch(() => ({ error: "Gagal menghapus" }));
     if (r && r.error) {
       setHidden([id], false);
-      toast({ emoji: "😵", text: `${r.error}. Coba lagi ya.` });
+      toast({ text: `${r.error}. Coba lagi ya.` });
     } else refresher();
   };
   const timer = setTimeout(commit, 5000);
   pendingDeletes.set(id, commit);
   const tid = toast({
-    emoji: "🗑️",
     text,
     duration: 5000,
     action: {
@@ -115,7 +114,7 @@ function deleteWithUndo(id: string, text: string, run: () => Promise<{ error?: s
         pendingDeletes.delete(id);
         setHidden([id], false);
         dismissToast(tid);
-        toast({ emoji: "↩️", text: "Nggak jadi dihapus", duration: 2000 });
+        toast({ text: "Nggak jadi dihapus", duration: 2000 });
       },
     },
   });
@@ -168,7 +167,6 @@ async function runSave(id: string) {
   if (r.error || !r.id) {
     patch(id, { status: "failed" });
     toast({
-      emoji: "😵",
       text: `${r.error ?? "Gagal menyimpan"}. Jajanmu belum tersimpan.`,
       duration: 8000,
       action: { label: "Coba lagi", run: () => void runSave(id) },
@@ -179,7 +177,7 @@ async function runSave(id: string) {
   patch(id, { realId: r.id });
   refresher();
   const stickers = p.items.filter((i) => i.sticker_path).length;
-  toast({ emoji: "🎉", text: stickers ? `Tersimpan! ${stickers} stiker ditempel` : "Jajan tersimpan!" });
+  toast({ text: stickers ? `Tersimpan! ${stickers} stiker ditempel` : "Jajan tersimpan!" });
 }
 
 /** Tampilkan jajan baru seketika, lalu simpan ke server di belakang layar. */

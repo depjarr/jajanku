@@ -1,3 +1,4 @@
+import { Flame, Sprout } from "lucide-react";
 import { requireUser } from "@/lib/supabase/server";
 import { todayJakarta } from "@/lib/dates";
 import { HISTORY_SELECT, computeAchievements, type HistoryEntry } from "@/lib/achievements";
@@ -20,12 +21,12 @@ export default async function PencapaianPage() {
 
       <section className="mb-5 grid grid-cols-2 gap-3">
         <div className="rounded-[24px] bg-gradient-to-br from-deep to-strong p-4 text-white">
-          <p className="text-3xl leading-none" aria-hidden>🔥</p>
+          <Flame className="size-7" aria-hidden />
           <p className="mt-2 font-heading text-3xl font-bold">{ach.recordStreak}</p>
           <p className="text-sm opacity-90">hari berturut nyatat</p>
         </div>
         <div className="rounded-[24px] bg-soft p-4">
-          <p className="text-3xl leading-none" aria-hidden>🌱</p>
+          <Sprout className="size-7 text-strong" aria-hidden />
           <p className="mt-2 font-heading text-3xl font-bold text-strong">{ach.hematStreak ?? "–"}</p>
           <p className="text-sm text-muted">{ach.hematStreak == null ? "atur budget untuk streak hemat" : "hari hemat berturut"}</p>
         </div>

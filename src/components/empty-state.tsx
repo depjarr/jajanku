@@ -1,5 +1,6 @@
 "use client";
 
+import { Camera } from "lucide-react";
 import Link from "next/link";
 import { motion, useReducedMotion } from "motion/react";
 
@@ -72,7 +73,7 @@ export function EmptyState({
       {text && <p className="mx-auto mt-1 max-w-xs text-sm text-muted">{text}</p>}
       {cta && (
         <Link href={cta.href} className="press mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-strong px-6 font-semibold text-white shadow-[0_12px_24px_-12px_var(--c-strong)]">
-          <span aria-hidden>📸</span> {cta.label}
+          <Camera className="size-5" aria-hidden /> {cta.label}
         </Link>
       )}
     </div>

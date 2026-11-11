@@ -1,5 +1,6 @@
 "use client";
 
+import { ReceiptText, Scissors, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { Grid2x2, ImagePlus, Plus, SwitchCamera, Trash2, X } from "lucide-react";
@@ -392,7 +393,7 @@ export function Capture({
                 >
                   {d.cutting ? (
                     <span className="analyzing relative grid size-24 place-items-center overflow-hidden rounded-3xl bg-soft text-center text-[11px] font-semibold text-muted" role="status">
-                      <span className="mx-auto block text-xl leading-none" aria-hidden>✂️</span>
+                      <Scissors className="mx-auto size-5" aria-hidden />
                       memotong…
                     </span>
                   ) : (
@@ -419,7 +420,7 @@ export function Capture({
             onClick={() => receiptRef.current?.click()}
             className={`relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-soft py-3 font-semibold disabled:opacity-80 ${receiptBusy ? "analyzing" : ""}`}
           >
-            <span aria-hidden>🧾</span> {receiptBusy ? "Membaca struk…" : "Isi harga dari struk"}
+            <ReceiptText className="size-5" aria-hidden /> {receiptBusy ? "Membaca struk…" : "Isi harga dari struk"}
           </button>
         )}
         <input
@@ -476,7 +477,7 @@ export function Capture({
             />
             <AnalyzingDust />
             <div className="glass absolute inset-x-0 bottom-6 mx-auto w-fit rounded-full px-4 py-2 text-sm font-semibold" role="status">
-              <span className="inline-flex items-center gap-1.5">✨ AI lagi memotong jajananmu jadi stiker…</span>
+              <span className="inline-flex items-center gap-1.5"><Sparkles className="size-4" aria-hidden /> AI lagi memotong jajananmu jadi stiker…</span>
             </div>
           </div>
         ) : cameraError ? (

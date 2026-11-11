@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { AnimatePresence, motion } from "motion/react";
 import { useActionState, useState } from "react";
-import { ChevronLeft, Eye, EyeOff } from "lucide-react";
+import { ChevronLeft, CircleCheck, Eye, EyeOff } from "lucide-react";
 import { login, register, type AuthState } from "./actions";
 import { ScanIllustration } from "@/components/ui/scan-illustration";
 import { BotTrap, PasswordMeter } from "./guards";
@@ -75,7 +75,7 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
               transition={{ ...softSpring, delay: 0.15 }}
               className="mb-3 flex items-center gap-2 rounded-2xl bg-soft px-4 py-3 text-sm font-semibold text-strong"
             >
-              <span className="text-lg leading-none" aria-hidden>🎉</span> {notice}
+              <CircleCheck className="size-5 shrink-0" aria-hidden /> {notice}
             </motion.p>
           )}
           <Form mode={mode} />

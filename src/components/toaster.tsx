@@ -36,7 +36,7 @@ export function Toaster() {
             className="pointer-events-auto relative flex w-full max-w-sm items-center gap-3 overflow-hidden rounded-full bg-ink py-2 pl-4 pr-2 text-sm text-white shadow-[0_16px_34px_-14px_rgb(0_0_0/0.55)]"
             role="status"
           >
-            <span className="text-xl leading-none" aria-hidden>{t.emoji}</span>
+            {t.emoji && <span className="text-xl leading-none" aria-hidden>{t.emoji}</span>}
             <span className="min-w-0 flex-1 truncate py-1.5 font-semibold">{t.text}</span>
             {t.action && (
               <button

@@ -1,5 +1,6 @@
 "use client";
 
+import { KeyRound } from "lucide-react";
 import { useState, useTransition } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { regenerateRecoveryCode } from "@/app/(auth)/actions";
@@ -36,9 +37,7 @@ export function RecoveryPanel({ enabled, createdAt }: { enabled: boolean; create
           </motion.div>
         ) : (
           <motion.div key="info" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-3">
-            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-soft text-2xl leading-none" aria-hidden>
-              🔑
-            </span>
+            <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-soft text-strong"><KeyRound className="size-5" aria-hidden /></span>
             <span className="min-w-0 flex-1">
               <span className="block font-semibold">Kode pemulihan</span>
               <span className="block text-xs text-muted">
