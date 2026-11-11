@@ -26,13 +26,6 @@ type LiveEntry = Entry | PendingEntry;
 const isPending = (e: LiveEntry): e is PendingEntry => "status" in e;
 import { DAYS_SHORT, MONTHS, calendarCells, formatDayLong, formatTime, shiftMonth } from "@/lib/dates";
 
-const CAT_COLOR: Record<Category, string> = {
-  makanan: "var(--c-primary)",
-  minuman: "var(--c-accent)",
-  snack: "var(--c-ink)",
-  lainnya: "var(--c-muted)",
-};
-
 export function MejaView({
   year,
   month,
@@ -109,11 +102,6 @@ export function MejaView({
 
   const allItems = filtered.flatMap((e) => e.items);
   const total = allItems.reduce((s, i) => s + itemTotal(i), 0);
-  const perCat = CATEGORIES.map((c) => ({
-    c,
-    v: live.flatMap((e) => e.items).filter((i) => i.category === c).reduce((s, i) => s + itemTotal(i), 0),
-  }));
-  const catTotal = perCat.reduce((s, x) => s + x.v, 0);
 
   const goMonth = (delta: number) => {
     haptic();
@@ -179,33 +167,7 @@ export function MejaView({
           {budget ? <BudgetBar total={total} budget={budget} /> : (
             <Link href="/statistik" className="mt-2 inline-block text-xs font-semibold underline opacity-70">+ Atur budget bulanan</Link>
           )}
-          <div className="mt-4 flex h-2.5 overflow-hidden rounded-full bg-bg/15">
-            {perCat.map(({ c, v }, i) => (
-              <motion.span
-                key={c}
-                style={{ background: c === "snack" ? "var(--c-bg)" : CAT_COLOR[c] }}
-                initial={{ width: 0 }}
-                animate={{ width: catTotal ? `${(v / catTotal) * 100}%` : 0 }}
-                transition={{ ...softSpring, delay: 0.2 + i * 0.08 }}
-              />
-            ))}
-          </div>
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs opacity-80">
-            {perCat.filter((x) => x.v > 0).map(({ c }) => (
-              <span key={c} className="flex items-center gap-1.5">
-                <span className="size-2 rounded-full" style={{ background: c === "snack" ? "var(--c-bg)" : CAT_COLOR[c] }} />
-                {CATEGORY_LABEL[c].label}
-              </span>
-            ))}
-            {catTotal === 0 && <span>Belum ada jajan bulan ini</span>}
-          </div>
-          <div className="my-4 border-t border-dashed border-white/35" />
-          <dl className="space-y-1 font-mono text-[13px]">
-            <ReceiptRow label="Item" value={allItems.length} />
-            <ReceiptRow label="Hari jajan" value={byDay.size} />
-            {achievements.recordStreak > 0 && <ReceiptRow label="Streak nyatat" value={achievements.recordStreak} suffix=" hr" />}
-          </dl>
-          <p className="mt-4 text-center font-mono text-[10px] uppercase tracking-[0.3em] opacity-60">** terima kasih sudah nyatat **</p>
+          <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-[0.3em] opacity-60">** terima kasih sudah nyatat **</p>
         </div>
       </motion.section>
       <AchievementWatcher badges={achievements.badges} />
@@ -548,18 +510,6 @@ function BudgetBar({ total, budget }: { total: number; budget: number }) {
   );
 }
 
-/** Baris struk: label .......... angka */
-function ReceiptRow({ label, value, suffix = "" }: { label: string; value: number; suffix?: string }) {
-  return (
-    <div className="flex items-baseline gap-2">
-      <dt className="uppercase tracking-wider opacity-80">{label}</dt>
-      <span aria-hidden className="mb-1 flex-1 border-b border-dotted border-white/35" />
-      <dd className="font-bold">
-        <AnimatedNumber value={value} format={(n) => `${n}${suffix}`} />
-      </dd>
-    </div>
-  );
-}
 
 function IconBtn({ label, onClick, children }: { label: string; onClick: () => void; children: React.ReactNode }) {
   return (
