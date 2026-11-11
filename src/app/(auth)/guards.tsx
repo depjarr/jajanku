@@ -6,19 +6,27 @@ import { Check, X } from "lucide-react";
 import { passwordChecks, passwordScore } from "@/lib/password";
 
 /**
- * Jebakan bot tak terlihat: kolom "website" (manusia tidak akan mengisinya)
+ * Jebakan bot tak terlihat: kolom "jj_hp" (manusia tidak akan mengisinya)
  * dan waktu halaman dibuka (bot biasanya mengirim formulir seketika).
  */
 export function BotTrap() {
   const started = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (started.current) started.current.value = String(Date.now());
+    const el = started.current;
+    if (!el) return;
+    const t = String(Date.now());
+    el.value = t;
+    // React mereset formulir setelah dikirim → isi lagi waktunya supaya kiriman berikutnya tidak dianggap bot.
+    const form = el.form;
+    const refill = () => queueMicrotask(() => (el.value = t));
+    form?.addEventListener("reset", refill);
+    return () => form?.removeEventListener("reset", refill);
   }, []);
   return (
     <div aria-hidden className="pointer-events-none absolute -left-[9999px] h-0 w-0 overflow-hidden">
       <label>
         Website
-        <input type="text" name="website" tabIndex={-1} autoComplete="off" defaultValue="" />
+        <input type="text" name="jj_hp" tabIndex={-1} autoComplete="off" defaultValue="" />
       </label>
       <input ref={started} type="hidden" name="started" defaultValue="" />
     </div>

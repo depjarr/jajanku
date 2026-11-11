@@ -87,6 +87,8 @@ export function AuthForm({ mode, notice }: { mode: "login" | "register"; notice?
 function Form({ mode }: { mode: "login" | "register" }) {
   const isLogin = mode === "login";
   const [state, action, pending] = useActionState<AuthState, FormData>(isLogin ? login : register, undefined);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [confirm, setConfirm] = useState("");
   const mismatch = !isLogin && confirm.length > 0 && confirm !== pw;
@@ -96,8 +98,8 @@ function Form({ mode }: { mode: "login" | "register" }) {
       <BotTrap />
 
       <div className="overflow-hidden rounded-2xl bg-ink/[0.035] ring-1 ring-ink/5">
-        {!isLogin && <Field label="Nama panggilan" name="name" autoComplete="nickname" />}
-        <Field label="Email" name="email" type="email" autoComplete="email" inputMode="email" maxLength={120} />
+        {!isLogin && <Field label="Nama panggilan" name="name" autoComplete="nickname" value={name} onChange={(e) => setName(e.target.value)} />}
+        <Field label="Email" name="email" type="email" autoComplete="email" inputMode="email" maxLength={120} value={email} onChange={(e) => setEmail(e.target.value)} />
         <PasswordField isLogin={isLogin} value={pw} onChange={setPw} />
         {!isLogin && <PasswordField isLogin={false} name="confirm" label="Ulangi password" value={confirm} onChange={setConfirm} />}
       </div>

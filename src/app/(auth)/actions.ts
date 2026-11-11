@@ -17,13 +17,14 @@ async function clientIp() {
 }
 
 /**
- * Jebakan bot: kolom tersembunyi "website" harus kosong, dan formulir
+ * Jebakan bot: kolom tersembunyi "jj_hp" harus kosong, dan formulir
  * tidak mungkin diisi manusia dalam < 1,5 detik sejak halaman dibuka.
  */
 function looksLikeBot(formData: FormData) {
-  if (String(formData.get("website") ?? "").length > 0) return true;
+  if (String(formData.get("jj_hp") ?? "").length > 0) return true;
   const started = Number(formData.get("started") ?? 0);
-  return !started || Date.now() - started < 1500;
+  // Waktu kosong (mis. JS belum jalan) tidak langsung dianggap bot; kolom jebakan tetap berlaku.
+  return started > 0 && Date.now() - started < 1500;
 }
 
 const loginSchema = z.object({
