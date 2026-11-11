@@ -7,6 +7,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { X } from "lucide-react";
 import { rupiah } from "@/lib/types";
 import { softSpring } from "@/components/ui/haptic";
+import { showNotice } from "@/lib/notify";
 
 type Level = "warn" | "over";
 
@@ -43,9 +44,7 @@ export function BudgetAlert({ total, budget, monthKey }: { total: number; budget
       level === "over"
         ? `Jajan bulan ini ${rupiah(total)}, lewat ${rupiah(total - budget)} dari budget.`
         : `Jajan bulan ini sudah ${Math.round((total / budget) * 100)}% dari budget ${rupiah(budget)}.`;
-    try {
-      new Notification(level === "over" ? "Budget jajan terlewati" : "Budget jajan hampir habis", { body, icon: "/icons/icon-192.png", tag: key });
-    } catch {}
+    void showNotice(level === "over" ? "Budget jajan terlewati" : "Budget jajan hampir habis", { body, tag: key, url: "/statistik" });
   }, [level, budget, total, key]);
 
   const closedBefore = useSyncExternalStore(noopSubscribe, () => storageGet(`${key}:closed`) === "1", () => false);
@@ -100,7 +99,7 @@ export function BudgetAlert({ total, budget, monthKey }: { total: number; budget
   );
 }
 
-/** Tombol untuk mengizinkan notifikasi browser. */
+/** Tombol untuk mengizinkan notifikasi + tombol tes. */
 export function NotifyToggle() {
   const initial = useSyncExternalStore<NotificationPermission | "unsupported">(
     noopSubscribe,
@@ -108,17 +107,55 @@ export function NotifyToggle() {
     () => "unsupported",
   );
   const [asked, setAsked] = useState<NotificationPermission | null>(null);
+  const [tested, setTested] = useState<"ok" | "fail" | null>(null);
   const perm = asked ?? initial;
-  if (perm === "unsupported") return null;
-  if (perm === "granted") return <p className="mt-2 text-xs text-muted">Notifikasi pengingat aktif di perangkat ini.</p>;
-  if (perm === "denied") return <p className="mt-2 text-xs text-muted">Notifikasi diblokir. Izinkan dari pengaturan browser untuk mengaktifkan.</p>;
+
+  const help = (
+    <p className="mt-2 text-xs text-muted">
+      Kalau pop-up izin tidak muncul atau diblokir:
+      <br />• <strong>Aplikasi Jajanku di HP</strong>: Pengaturan HP → Aplikasi → Jajanku → Notifikasi → Izinkan.
+      <br />• <strong>Chrome</strong>: ketuk ikon di samping alamat situs → Izin → Notifikasi → Izinkan.
+    </p>
+  );
+
+  if (perm === "unsupported")
+    return <p className="mt-2 text-xs text-muted">Browser ini belum mendukung notifikasi. Di iPhone, tambahkan Jajanku ke Layar Utama dulu.</p>;
+  if (perm === "granted")
+    return (
+      <div className="mt-2 flex items-center justify-between gap-2 text-xs text-muted">
+        <span>{tested === "fail" ? "Notifikasi gagal tampil. Cek izin notifikasi aplikasi di pengaturan HP." : tested === "ok" ? "Notifikasi tes terkirim." : "Notifikasi pengingat aktif di perangkat ini."}</span>
+        <button
+          type="button"
+          onClick={async () => setTested((await showNotice("Tes notifikasi Jajanku", { body: "Pengingat budget akan muncul seperti ini.", url: "/statistik" })) ? "ok" : "fail")}
+          className="press shrink-0 rounded-full bg-soft px-3 py-1.5 font-semibold text-strong"
+        >
+          Kirim tes
+        </button>
+      </div>
+    );
+  if (perm === "denied")
+    return (
+      <div>
+        <p className="mt-2 text-xs font-semibold text-accent-text">Notifikasi diblokir di perangkat ini.</p>
+        {help}
+      </div>
+    );
   return (
-    <button
-      type="button"
-      onClick={async () => setAsked(await Notification.requestPermission())}
-      className="press mt-3 w-full rounded-xl bg-soft py-2.5 text-sm font-semibold"
-    >
-      <span className="inline-flex items-center gap-1.5"><Bell className="size-4" aria-hidden /> Ingatkan aku saat budget hampir habis</span>
-    </button>
+    <div>
+      <button
+        type="button"
+        onClick={async () => {
+          try {
+            setAsked(await Notification.requestPermission());
+          } catch {
+            setAsked("denied");
+          }
+        }}
+        className="press mt-3 w-full rounded-xl bg-soft py-2.5 text-sm font-semibold"
+      >
+        <span className="inline-flex items-center gap-1.5"><Bell className="size-4" aria-hidden /> Ingatkan aku saat budget hampir habis</span>
+      </button>
+      {asked === "default" && help}
+    </div>
   );
 }
