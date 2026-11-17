@@ -92,7 +92,7 @@ function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) 
 
           {/* pita jumlah */}
           <div className="mt-2.5 flex items-center justify-between rounded-[4px] bg-primary/30 px-2.5 py-1.5 text-[9px]">
-            <span className="uppercase tracking-wider">{entries.length} momen jajan</span>
+            <span className="uppercase tracking-wider">Momen jajan</span>
             <span>Jumlah: {qty}</span>
           </div>
 
