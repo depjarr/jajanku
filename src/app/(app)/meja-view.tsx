@@ -3,6 +3,7 @@
 import { CategoryLabel } from "@/components/icons";
 import { MessageCircle } from "lucide-react";
 import { EmptyState } from "@/components/empty-state";
+import { DayShareSheet } from "@/components/day-receipt";
 import { AchievementWatcher } from "@/components/achievements";
 import type { Achievements } from "@/lib/achievements";
 import { forgetPending, launchFlight, markLanded, retrySave, stableKey, useHidden, usePending, type PendingEntry, type PendingItem } from "@/lib/live";
@@ -10,7 +11,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
-import { CalendarDays, ChevronLeft, ChevronRight, ChevronRight as Chevron, List, Plus } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, ChevronRight as Chevron, List, Plus, Share2 } from "lucide-react";
 import { Sticker } from "@/components/sticker";
 import { LargeTitle } from "@/components/ui/large-title";
 import { Segmented } from "@/components/ui/segmented";
@@ -55,6 +56,7 @@ export function MejaView({
   const [cat, setCat] = useState<Category | null>(null);
   const [focus, setFocus] = useState<string | null>(initialFocus);
   const [dir, setDir] = useState(0);
+  const [shareDay, setShareDay] = useState<string | null>(null);
 
   // Gabungkan data server + jajan yang baru disimpan, minus yang sedang dihapus.
   const monthKey = `${year}-${String(month).padStart(2, "0")}`;
@@ -333,7 +335,12 @@ export function MejaView({
               <div key={date}>
                 <div className="sticky top-12 z-10 -mx-1 mb-2 flex items-baseline justify-between px-1 py-1">
                   <h3 className="text-[17px] font-bold">{formatDayLong(date)}</h3>
-                  <span className="text-sm font-semibold text-muted">{rupiah(list.flatMap((e) => e.items).reduce((s, i) => s + itemTotal(i), 0))}</span>
+                  <span className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-muted">{rupiah(list.flatMap((e) => e.items).reduce((s, i) => s + itemTotal(i), 0))}</span>
+                    <button type="button" onClick={() => setShareDay(date)} aria-label={`Bagikan struk ${formatDayLong(date)}`} className="press grid size-9 place-items-center rounded-full bg-soft text-strong">
+                      <Share2 className="size-4" aria-hidden />
+                    </button>
+                  </span>
                 </div>
                 <ul className="space-y-2">
                   {list.map((e, i) => (
@@ -359,6 +366,8 @@ export function MejaView({
       </div>
       </div>
 
+      {shareDay && <DayShareSheet open onClose={() => setShareDay(null)} date={shareDay} entries={byDay.get(shareDay) ?? []} storeNames={storeNames} />}
+
       {/* Detail hari (HP) */}
       <Sheet open={!!focus && !isWide} onClose={() => setFocus(null)}>
         {focus && <DayDetail date={focus} entries={byDay.get(focus) ?? []} storeNames={storeNames} />}
@@ -369,8 +378,10 @@ export function MejaView({
 
 function DayDetail({ date, entries, storeNames }: { date: string; entries: LiveEntry[]; storeNames: Record<string, string> }) {
   const total = entries.flatMap((e) => e.items).reduce((s, i) => s + itemTotal(i), 0);
+  const [sharing, setSharing] = useState(false);
   return (
     <div>
+      <DayShareSheet open={sharing} onClose={() => setSharing(false)} date={date} entries={entries} storeNames={storeNames} />
       <div className="mb-3 flex items-end justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-xl font-bold">{formatDayLong(date)}</p>
@@ -378,9 +389,16 @@ function DayDetail({ date, entries, storeNames }: { date: string; entries: LiveE
             {entries.length} momen · {rupiah(total)}
           </p>
         </div>
-        <Link href={`/tambah?d=${date}`} className="press flex shrink-0 items-center gap-1 rounded-full bg-strong px-3.5 py-2 text-sm font-semibold text-white">
-          <Plus className="size-4" aria-hidden /> Tambah
-        </Link>
+        <div className="flex shrink-0 gap-2">
+          {entries.length > 0 && (
+            <button type="button" onClick={() => setSharing(true)} aria-label="Bagikan struk hari ini" className="press grid size-10 place-items-center rounded-full bg-soft text-strong">
+              <Share2 className="size-[18px]" aria-hidden />
+            </button>
+          )}
+          <Link href={`/tambah?d=${date}`} className="press flex items-center gap-1 rounded-full bg-strong px-3.5 py-2 text-sm font-semibold text-white">
+            <Plus className="size-4" aria-hidden /> Tambah
+          </Link>
+        </div>
       </div>
       {entries.length === 0 ? (
         <EmptyState className="" emoji="🍽️" orbit={["🍢", "🥤", "🍫"]} title="Piringnya masih kosong" text="Belum ada jajan di hari ini. Ketuk Tambah untuk mencatat." />
