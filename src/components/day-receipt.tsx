@@ -1,96 +1,155 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { motion } from "motion/react";
 import { Download, Share2 } from "lucide-react";
+import { Caveat, Shrikhand, Space_Mono } from "next/font/google";
 import { Sheet } from "@/components/ui/sheet";
 import { Sticker } from "@/components/sticker";
-import { formatDayLong, formatTime } from "@/lib/dates";
-import { itemKcal, itemTotal, kcal, rupiah, type Entry, type Item } from "@/lib/types";
+import { MONTHS, formatDayLong, formatTime } from "@/lib/dates";
+import { CATEGORIES, CATEGORY_LABEL, itemKcal, itemTotal, kcal, rupiah, type Entry, type Item } from "@/lib/types";
+
+const logoFont = Shrikhand({ subsets: ["latin"], weight: "400", preload: false });
+const scriptFont = Caveat({ subsets: ["latin"], weight: ["600", "700"], preload: false });
+const monoFont = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], preload: false });
 
 type DayItem = Item & { store_name?: string | null };
 type DayEntry = Omit<Entry, "items"> & { items: DayItem[] };
 
-const MAX_ROWS = 7;
+const MAX_ROWS = 6;
+const PAPER = "#FFF8EA";
+
+/** Baris struk: label ..... nilai */
+function Dotted({ label, value, bold = false }: { label: string; value: string; bold?: boolean }) {
+  return (
+    <p className={`flex items-baseline gap-1.5 ${bold ? "text-[12px] font-bold" : "text-[10.5px]"}`}>
+      <span className="uppercase">{label}</span>
+      <span aria-hidden className="mb-[3px] flex-1 border-b border-dotted border-current opacity-50" />
+      <span>{value}</span>
+    </p>
+  );
+}
 
 /**
- * Kartu "struk" jajan satu hari berukuran story (9:16),
- * siap dibagikan ke status WhatsApp / story Instagram.
+ * Kartu "struk" jajan satu hari berukuran story (9:16):
+ * kertas kasir krem bergerigi atas-bawah, logo retro, daftar item, total, dan mood jajan.
  */
-function ReceiptStory({ date, entries, storeNames }: { date: string; entries: DayEntry[]; storeNames: Record<string, string> }) {
-  const items = entries.flatMap((e) =>
-    e.items.map((i) => ({ ...i, time: e.eaten_at, store: i.store_id ? storeNames[i.store_id] : i.store_name })),
-  );
+function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) {
+  const items = entries.flatMap((e) => e.items);
   const shown = items.slice(0, MAX_ROWS);
   const more = items.slice(MAX_ROWS);
   const total = items.reduce((s, i) => s + itemTotal(i), 0);
   const totalKcal = items.reduce((s, i) => s + itemKcal(i), 0);
-  const qtyCount = items.reduce((s, i) => s + Number(i.qty), 0);
+  const qty = items.reduce((s, i) => s + Number(i.qty), 0);
+  const cats = new Set(items.map((i) => i.category));
+  const times = [...new Set(entries.map((e) => formatTime(e.eaten_at)).filter(Boolean))];
+  const [y, m, d] = date.split("-").map(Number);
+  const dayOfYear = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86_400_000);
+  const stickers = items.slice(0, 4);
+
+  // Kalau itemnya banyak, kecilkan struk supaya tetap muat di kanvas story.
+  const box = useRef<HTMLDivElement>(null);
+  const paper = useRef<HTMLDivElement>(null);
+  const [fit, setFit] = useState(1);
+  useLayoutEffect(() => {
+    const b = box.current;
+    const p = paper.current;
+    if (!b || !p) return;
+    const room = b.clientHeight * 0.86;
+    const next = Math.min(1, room / p.offsetHeight);
+    setFit((f) => (Math.abs(f - next) > 0.01 ? next : f));
+  }, [items.length]);
 
   return (
-    <div className="relative flex aspect-[9/16] w-full flex-col overflow-hidden bg-soft px-[6%] pb-[6%] pt-[7%] text-ink">
-      {/* titik-titik halus di latar */}
-      <div aria-hidden className="absolute inset-0 opacity-50 [background-image:radial-gradient(var(--c-primary)_1px,transparent_1.4px)] [background-size:14px_14px]" />
-
-      <div className="relative mb-[5%] flex items-center justify-between">
-        <span className="font-heading text-[22px] font-bold tracking-tight">
-          jajanku<span className="text-strong">.</span>
-        </span>
-        <span className="rounded-full bg-strong px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.15em] text-white">{formatDayLong(date)}</span>
+    <div ref={box} className="relative aspect-[9/16] w-full overflow-hidden bg-strong">
+      {/* struk kedua di belakang, sedikit miring */}
+      <div aria-hidden className="receipt-both absolute -right-[18%] top-[3%] h-[62%] w-[70%] rotate-[8deg] opacity-90" style={{ background: PAPER }}>
+        <p className={`${logoFont.className} mt-[14%] text-center text-[30px] leading-none text-strong`}>jajanku</p>
+        <div className="mx-[12%] mt-5 space-y-2.5">
+          {[0, 1, 2, 3, 4].map((k) => (
+            <span key={k} className="block h-[5px] rounded-full bg-strong/15" style={{ width: `${90 - k * 12}%` }} />
+          ))}
+        </div>
       </div>
 
-      <div className="receipt relative flex flex-1 flex-col rounded-t-[18px] bg-surface px-[6%] pb-7 pt-5 shadow-sm">
-        <p className="font-heading text-[19px] font-bold">Rincian Jajan</p>
-        <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted">
-          {entries.length} momen · {qtyCount} item
-        </p>
+      {/* struk utama */}
+      <div
+        ref={paper}
+        className="absolute left-[7%] top-[5%] w-[80%] drop-shadow-[0_14px_16px_rgb(0_0_0/0.28)]"
+        style={{ transform: `rotate(-3deg) scale(${fit})`, transformOrigin: "top center" }}
+      >
+        <div className={`receipt-both px-[8%] pb-7 pt-7 text-[#3B4A1E] ${monoFont.className}`} style={{ background: PAPER }}>
+          {/* logo */}
+          <div className="flex items-center justify-center gap-1.5">
+            <span className={`${logoFont.className} text-[34px] leading-none text-strong`}>jajanku</span>
+            {stickers[0] && <Sticker path={stickers[0].sticker_path} alt="" category={stickers[0].category} className="-mt-3 size-8 rotate-12" />}
+          </div>
 
-        <ul className="flex-1 space-y-2.5">
-          {shown.map((i) => {
-            const sub = [i.store, i.package_size, i.calories ? `≈${kcal(itemKcal(i))}` : null, i.note ? `“${i.note}”` : null].filter(Boolean).join(" · ");
-            return (
-              <li key={i.id} className="flex items-start gap-2.5">
-                <Sticker path={i.sticker_path} alt="" category={i.category} className="size-10 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="flex gap-1.5 text-[13px] leading-tight">
-                    <span className="shrink-0 text-muted">{Number(i.qty)} x</span>
-                    <span className="line-clamp-2 font-semibold">{i.name}</span>
-                  </p>
-                  {sub && <p className="mt-0.5 line-clamp-1 pl-[1.6em] text-[10.5px] text-muted">{sub}</p>}
-                </div>
-                <span className="shrink-0 text-[13px] font-semibold">{rupiah(itemTotal(i))}</span>
+          <p className="mt-2 text-center text-[7px] uppercase tracking-[0.06em] opacity-80">
+            No. {String(dayOfYear).padStart(4, "0")} | Tgl {d} {MONTHS[m - 1].slice(0, 3)} {y}
+            {times[0] ? ` | Jam ${times[0]}` : ""} | Kasir: Kamu
+          </p>
+
+          {/* pita stiker */}
+          <div className="mt-2.5 flex items-center justify-between rounded-[4px] bg-primary/30 px-2 py-1.5">
+            <span className="flex -space-x-1">
+              {stickers.map((i) => (
+                <span key={i.id} className="grid size-[22px] place-items-center overflow-hidden rounded-full bg-accent/40 ring-2" style={{ ["--tw-ring-color" as string]: PAPER }}>
+                  <Sticker path={i.sticker_path} alt="" category={i.category} className="size-[19px]" />
+                </span>
+              ))}
+            </span>
+            <span className="text-[9px]">Jumlah: {qty}</span>
+          </div>
+
+          <p className="mt-3 border-b border-current/40 pb-1 text-[11px] font-bold">Item dibeli</p>
+          <ul className="mt-2 space-y-1.5 text-[10.5px]">
+            {shown.map((i) => (
+              <li key={i.id} className="flex items-baseline justify-between gap-2">
+                <span className="line-clamp-1">
+                  {Number(i.qty)}x {i.name}
+                </span>
+                <span className="shrink-0">{rupiah(itemTotal(i))}</span>
               </li>
-            );
-          })}
-          {more.length > 0 && (
-            <li className="text-center text-[11px] font-semibold text-muted">
-              + {more.length} item lainnya · {rupiah(more.reduce((s, i) => s + itemTotal(i), 0))}
-            </li>
-          )}
-        </ul>
+            ))}
+            {more.length > 0 && (
+              <li className="flex justify-between opacity-70">
+                <span>+{more.length} item lainnya</span>
+                <span>{rupiah(more.reduce((s, i) => s + itemTotal(i), 0))}</span>
+              </li>
+            )}
+          </ul>
 
-        <div className="mt-3 space-y-1 border-t border-dashed border-ink/20 pt-3 text-[12px]">
-          {totalKcal > 0 && (
-            <p className="flex justify-between text-muted">
-              <span>Perkiraan kalori</span>
-              <span>≈{kcal(totalKcal)}</span>
-            </p>
-          )}
-          {entries.some((e) => e.eaten_at) && (
-            <p className="flex justify-between text-muted">
-              <span>Jam jajan</span>
-              <span>{[...new Set(entries.map((e) => formatTime(e.eaten_at)).filter(Boolean))].slice(0, 3).join(", ")}</span>
-            </p>
-          )}
-          <p className="flex items-baseline justify-between pt-1">
-            <span className="text-[14px] font-bold">Subtotal Jajan ({items.length} menu)</span>
-            <span className="font-heading text-[18px] font-bold text-strong">{rupiah(total)}</span>
+          <div className="mt-3 space-y-1 border-t border-current/40 pt-2">
+            <Dotted label="Subtotal" value={rupiah(total)} />
+            {totalKcal > 0 && <Dotted label="Kalori" value={`≈${kcal(totalKcal)}`} />}
+            <Dotted label="Momen" value={String(entries.length)} />
+          </div>
+          <div className="mt-2 border-t border-current/40 pt-2">
+            <Dotted label="Total" value={rupiah(total)} bold />
+          </div>
+
+          {/* mood jajan */}
+          <div className="mt-3 flex items-start gap-2 text-[7.5px] uppercase">
+            <span className="w-[38%] leading-tight opacity-80">Mood jajan kamu hari ini</span>
+            <span className="grid flex-1 grid-cols-2 gap-x-2 gap-y-0.5 normal-case">
+              {CATEGORIES.map((c) => (
+                <span key={c} className={`flex items-center gap-1 ${cats.has(c) ? "" : "opacity-40"}`}>
+                  <span className={`size-[6px] rounded-full ${cats.has(c) ? "bg-strong" : "border border-current"}`} />
+                  {CATEGORY_LABEL[c].label}
+                </span>
+              ))}
+            </span>
+          </div>
+
+          <p className={`${scriptFont.className} mt-3 text-center text-[21px] font-bold leading-none text-strong`}>Jajan Kecil, Kenangan Besar</p>
+          <p className="mx-auto mt-1 max-w-[85%] text-center text-[6.5px] leading-snug opacity-70">
+            Dicatat pakai Jajanku: foto jajananmu, tiap item jadi stiker. catatjajanku.vercel.app
           </p>
         </div>
-
-        <p className="mt-4 text-center font-mono text-[9px] uppercase tracking-[0.28em] text-muted">** terima kasih sudah nyatat **</p>
-        <p className="mt-1 text-center font-mono text-[9px] tracking-[0.1em] text-muted/80">catatjajanku.vercel.app</p>
       </div>
+
+      <p className={`${scriptFont.className} absolute bottom-[3.5%] left-0 right-0 text-center text-[20px] text-white/90`}>{formatDayLong(date)}</p>
     </div>
   );
 }
@@ -101,13 +160,11 @@ export function DayShareSheet({
   onClose,
   date,
   entries,
-  storeNames,
 }: {
   open: boolean;
   onClose: () => void;
   date: string;
   entries: DayEntry[];
-  storeNames: Record<string, string>;
 }) {
   const card = useRef<HTMLDivElement>(null);
   const [busy, setBusy] = useState<"save" | "share" | null>(null);
@@ -158,7 +215,7 @@ export function DayShareSheet({
     <Sheet open={open} onClose={onClose} title={<p className="text-center text-lg font-bold">Bagikan struk hari ini</p>}>
       <div className="mx-auto w-full max-w-[320px] overflow-hidden rounded-[20px] shadow-[0_18px_40px_-20px_rgb(0_0_0/0.45)] ring-1 ring-ink/5">
         <div ref={card}>
-          <ReceiptStory date={date} entries={entries} storeNames={storeNames} />
+          <ReceiptStory date={date} entries={entries} />
         </div>
       </div>
       <p className="mt-3 text-center text-xs text-muted">Ukuran pas untuk status WhatsApp & story Instagram.</p>

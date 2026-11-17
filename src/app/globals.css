@@ -253,3 +253,18 @@ button,
     background-image: repeating-linear-gradient(to bottom, transparent 0 27px, rgb(255 255 255 / 0.05) 27px 28px);
   }
 }
+
+/* Struk bergerigi di atas DAN bawah (kartu bagikan). */
+@layer components {
+  .receipt-both {
+    --zz: 8px;
+    -webkit-mask:
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(2 * var(--zz)) var(--zz) repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--zz)) no-repeat,
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--zz)) var(--zz) repeat-x;
+    mask:
+      conic-gradient(from 135deg at top, #0000, #000 1deg 89deg, #0000 90deg) top / calc(2 * var(--zz)) var(--zz) repeat-x,
+      linear-gradient(#000 0 0) center / 100% calc(100% - 2 * var(--zz)) no-repeat,
+      conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / calc(2 * var(--zz)) var(--zz) repeat-x;
+  }
+}

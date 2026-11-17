@@ -366,7 +366,7 @@ export function MejaView({
       </div>
       </div>
 
-      {shareDay && <DayShareSheet open onClose={() => setShareDay(null)} date={shareDay} entries={byDay.get(shareDay) ?? []} storeNames={storeNames} />}
+      {shareDay && <DayShareSheet open onClose={() => setShareDay(null)} date={shareDay} entries={byDay.get(shareDay) ?? []} />}
 
       {/* Detail hari (HP) */}
       <Sheet open={!!focus && !isWide} onClose={() => setFocus(null)}>
@@ -381,7 +381,7 @@ function DayDetail({ date, entries, storeNames }: { date: string; entries: LiveE
   const [sharing, setSharing] = useState(false);
   return (
     <div>
-      <DayShareSheet open={sharing} onClose={() => setSharing(false)} date={date} entries={entries} storeNames={storeNames} />
+      <DayShareSheet open={sharing} onClose={() => setSharing(false)} date={date} entries={entries} />
       <div className="mb-3 flex items-end justify-between gap-2">
         <div className="min-w-0">
           <p className="truncate text-xl font-bold">{formatDayLong(date)}</p>
