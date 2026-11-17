@@ -16,7 +16,7 @@ const monoFont = Space_Mono({ subsets: ["latin"], weight: ["400", "700"], preloa
 type DayItem = Item & { store_name?: string | null };
 type DayEntry = Omit<Entry, "items"> & { items: DayItem[] };
 
-const MAX_ROWS = 6;
+const MAX_ROWS = 5;
 const PAPER = "#FFF8EA";
 
 /** Baris struk: label ..... nilai */
@@ -82,7 +82,7 @@ function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) 
           {/* logo */}
           <div className="flex items-center justify-center gap-1.5">
             <span className={`${logoFont.className} text-[34px] leading-none text-strong`}>jajanku</span>
-            {stickers[0] && <Sticker path={stickers[0].sticker_path} alt="" category={stickers[0].category} className="-mt-3 size-8 rotate-12" />}
+            {stickers[0] && <Sticker path={stickers[0].sticker_path} alt="" category={stickers[0].category} className="size-9 shrink-0 rotate-12 drop-shadow-[0_3px_3px_rgb(0_0_0/0.18)]" />}
           </div>
 
           <p className="mt-2 text-center text-[7px] uppercase tracking-[0.06em] opacity-80">
@@ -103,17 +103,19 @@ function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) 
           </div>
 
           <p className="mt-3 border-b border-current/40 pb-1 text-[11px] font-bold">Item dibeli</p>
-          <ul className="mt-2 space-y-1.5 text-[10.5px]">
+          <ul className="mt-2 space-y-1 text-[10.5px]">
             {shown.map((i) => (
-              <li key={i.id} className="flex items-baseline justify-between gap-2">
-                <span className="line-clamp-1">
+              <li key={i.id} className="flex items-center gap-2">
+                {/* stiker item menyembul di samping namanya */}
+                <Sticker path={i.sticker_path} alt="" category={i.category} className="-my-1 size-[30px] shrink-0 -rotate-6 drop-shadow-[0_3px_3px_rgb(0_0_0/0.18)]" />
+                <span className="line-clamp-1 flex-1">
                   {Number(i.qty)}x {i.name}
                 </span>
                 <span className="shrink-0">{rupiah(itemTotal(i))}</span>
               </li>
             ))}
             {more.length > 0 && (
-              <li className="flex justify-between opacity-70">
+              <li className="flex justify-between pl-[38px] opacity-70">
                 <span>+{more.length} item lainnya</span>
                 <span>{rupiah(more.reduce((s, i) => s + itemTotal(i), 0))}</span>
               </li>
