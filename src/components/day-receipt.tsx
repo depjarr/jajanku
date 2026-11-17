@@ -45,7 +45,7 @@ function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) 
   const times = [...new Set(entries.map((e) => formatTime(e.eaten_at)).filter(Boolean))];
   const [y, m, d] = date.split("-").map(Number);
   const dayOfYear = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(y, 0, 0)) / 86_400_000);
-  const stickers = items.slice(0, 4);
+  const logoSticker = items[0];
 
   // Kalau itemnya banyak, kecilkan struk supaya tetap muat di kanvas story.
   const box = useRef<HTMLDivElement>(null);
@@ -82,7 +82,7 @@ function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) 
           {/* logo */}
           <div className="flex items-center justify-center gap-1.5">
             <span className={`${logoFont.className} text-[34px] leading-none text-strong`}>jajanku</span>
-            {stickers[0] && <Sticker path={stickers[0].sticker_path} alt="" category={stickers[0].category} className="size-9 shrink-0 rotate-12 drop-shadow-[0_3px_3px_rgb(0_0_0/0.18)]" />}
+            {logoSticker && <Sticker path={logoSticker.sticker_path} alt="" category={logoSticker.category} className="size-9 shrink-0 rotate-12 drop-shadow-[0_3px_3px_rgb(0_0_0/0.18)]" />}
           </div>
 
           <p className="mt-2 text-center text-[7px] uppercase tracking-[0.06em] opacity-80">
@@ -90,16 +90,10 @@ function ReceiptStory({ date, entries }: { date: string; entries: DayEntry[] }) 
             {times[0] ? ` | Jam ${times[0]}` : ""} | Kasir: Kamu
           </p>
 
-          {/* pita stiker */}
-          <div className="mt-2.5 flex items-center justify-between rounded-[4px] bg-primary/30 px-2 py-1.5">
-            <span className="flex -space-x-1">
-              {stickers.map((i) => (
-                <span key={i.id} className="grid size-[22px] place-items-center overflow-hidden rounded-full bg-accent/40 ring-2" style={{ ["--tw-ring-color" as string]: PAPER }}>
-                  <Sticker path={i.sticker_path} alt="" category={i.category} className="size-[19px]" />
-                </span>
-              ))}
-            </span>
-            <span className="text-[9px]">Jumlah: {qty}</span>
+          {/* pita jumlah */}
+          <div className="mt-2.5 flex items-center justify-between rounded-[4px] bg-primary/30 px-2.5 py-1.5 text-[9px]">
+            <span className="uppercase tracking-wider">{entries.length} momen jajan</span>
+            <span>Jumlah: {qty}</span>
           </div>
 
           <p className="mt-3 border-b border-current/40 pb-1 text-[11px] font-bold">Item dibeli</p>
